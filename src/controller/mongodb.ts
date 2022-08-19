@@ -1,4 +1,5 @@
 import { createReadStream, pathExists } from 'fs-extra';
+import { object as convertToObject } from 'dot-object'
 import { DeleteResult, InsertOneResult, UpdateResult, WithId, Document, ObjectId, MongoClient, FindCursor, FindOptions, GridFSBucket } from 'mongodb';
 interface mongoCollectionInfo {
   dbName: string;
@@ -6,16 +7,16 @@ interface mongoCollectionInfo {
   filterId?: string;
 }
 
-function addMetadataCreate(data: Object): Object {
+function addMetadataCreate(data: Object): any {
   let now = new Date().getTime();
   let metadata = { createdAt: now, modifiedAt: now };
-  return { ...data, ...metadata };
+  return convertToObject({ ...data, ...metadata });
 }
 
-function addMetadataUpdate(data: Object): Object {
+function addMetadataUpdate(data: Object): any {
   let now = new Date().getTime();
   let metadata = { modifiedAt: now };
-  return { ...data, ...metadata };
+  return convertToObject({ ...data, ...metadata });
 }
 
 async function createOne(client: MongoClient, { dbName, collectionName }: mongoCollectionInfo, data: object): Promise<InsertOneResult> {
@@ -32,9 +33,7 @@ async function updateMany(client: MongoClient, { dbName, collectionName }: mongo
     .db(dbName)
     .collection(collectionName)
     .updateMany(filter, {
-      $set: {
-        ...addMetadataUpdate(updateData),
-      },
+      $set: addMetadataUpdate(updateData),
     });
 }
 async function updateById(client: MongoClient, { dbName, collectionName, filterId }: mongoCollectionInfo, updateData: object): Promise<UpdateResult> {

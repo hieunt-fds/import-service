@@ -1,8 +1,9 @@
+import 'dotenv/config'
 import 'module-alias/register'
 import bodyParser from 'body-parser';
 import https from 'https';
 import express from 'express';
-
+import { ensureDir } from 'fs-extra';
 import ImportXLSXRouter from "@routes/importXlsx";
 
 
@@ -26,7 +27,12 @@ app.use((err: any, _req: any, res: any, _next: any) => {
     error: err,
   });
 });
+// first run init
+ensureDir("tmp/")
+ensureDir("uploads/xlsx")
+ensureDir("uploads/tepdinhkem")
+
 app.use('/importXLSX', ImportXLSXRouter)
-app.listen(9000, async () => {
+app.listen(process.env.PORT, async () => {
   console.log("Server is up!");
 })
