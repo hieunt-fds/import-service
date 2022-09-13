@@ -11,7 +11,7 @@ async function getDanhMuc(db: string, config: ImportConfig, cacheDanhMuc: string
   let danhMuc: any = {};
   if (config.DanhMuc.startsWith("C_")) {
     try {
-      danhMuc = await fs.readJSON(`tmp/${db}___${config.DanhMuc}.json`)
+      danhMuc = await fs.readJSON(`tmp/danhmuc/${db}___${config.DanhMuc}.json`)
     }
     catch (err) {
     }
@@ -26,7 +26,9 @@ async function getDanhMuc(db: string, config: ImportConfig, cacheDanhMuc: string
     }
     if (config.Fields) {
       for (let key of config.Fields) {
-        projectFields[key] = 1
+        if (key) {
+          projectFields[key] = 1
+        }
       }
     }
     let cursor = await _client.db(db).collection(config.DanhMuc).find().project(projectFields);
@@ -42,7 +44,7 @@ async function getDanhMuc(db: string, config: ImportConfig, cacheDanhMuc: string
       };
     }
     try {
-      await fs.outputJson(`tmp/${db}___${config.DanhMuc}.json`, danhMuc)
+      await fs.outputJson(`tmp/danhmuc/${db}___${config.DanhMuc}.json`, danhMuc)
     }
     catch (err) {
       log(err)
