@@ -412,8 +412,22 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
     collectionName: collection
   })
   for (let record of lstData) {
-    const dataToCreate = addMetadataImport(record, fileName);
+    let dataToCreate: any = {};
     dataToCreate['type'] = collection;
+    dataToCreate = {
+      ...dataToCreate,
+      ...addMetadataImport(record, fileName),
+      ...database == 'CSDL_MTQA' ? {
+        "TrangThaiDuLieu": {
+          "_source": {
+            "MaMuc": "01",
+            "TenMuc": "Sơ bộ",
+            "type": "C_TrangThaiDuLieu"
+          }
+        },
+        "storage": "011"
+      } : {},
+    };
     await bulkService.bulkUpsertAdd({
       sourceRefId: dataToCreate['sourceRef'] + "___" + record[findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys(record)[0]]
     }, dataToCreate);

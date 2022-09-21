@@ -30,7 +30,6 @@ async function mapConfigSheet(worksheet: XLSX.WorkBook, cacheDanhMuc: string = '
     _Tdata[sheet] = await buildT_Data(worksheet.Sheets[sheet], _Sdata, cacheDanhMuc, database, _fileData);
     if (Array.isArray(_Tdata[sheet])) {
       responseData[sheet] = await bulkCreateDB(_Tdata[sheet], database, sheet, worksheet, fileName)
-
     }
     else {
       responseData.err = _Tdata[sheet];
