@@ -4,13 +4,13 @@ import { _client, _clientGridFS } from "@db/mongodb";
 import { object as convertToObject } from 'dot-object'
 import { getDanhMuc } from './danh_muc';
 import axios from 'axios';
-function addMetadataImport(record: any, fileName: string) {
+function addMetadataImport(record: any, fileName: string, site?: string) {
   let data = record;
   data['sourceRef'] = `ImportXlsx_${fileName}`;
   data['username'] = `ImportSevice`;
   data['openAccess'] = 0;
   data['order'] = 0;
-  data['site'] = 'csdl_mt';
+  data['site'] = site || 'csdl_mt';
   data['storage'] = 'regular';
   data["accessRoles"] = [
     {
@@ -406,7 +406,7 @@ async function buildT_Data(worksheet: WorkSheet, _Sdata: any, cacheDanhMuc: stri
   return sheetData;
 }
 
-async function bulkCreateDB(lstData: any[], database: string, collection: string, worksheet: WorkBook, fileName: string) {
+async function bulkCreateDB(lstData: any[], database: string, collection: string, worksheet: WorkBook, fileName: string, site?: string) {
   const bulkService = await DBUtils.bulkCreateOneIfNotExist(_client, {
     dbName: database,
     collectionName: collection
@@ -416,7 +416,7 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
     dataToCreate['type'] = collection;
     dataToCreate = {
       ...dataToCreate,
-      ...addMetadataImport(record, fileName),
+      ...addMetadataImport(record, fileName, site),
       ...database == 'CSDL_MTQA' ? {
         "TrangThaiDuLieu": {
           "_source": {

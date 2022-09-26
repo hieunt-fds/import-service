@@ -4,14 +4,14 @@ import XLSX from 'xlsx';
 import { readFile } from 'fs-extra';
 import { buildTepDuLieu, buildS_Data, buildT_Data, bulkCreateDB } from '@services/import/utils'
 
-async function processXLSX(files: { [fieldname: string]: Express.Multer.File[] }, cacheDanhMuc: string = 'false', database: string) {
+async function processXLSX(files: { [fieldname: string]: Express.Multer.File[] }, cacheDanhMuc: string = 'false', database: string, site?: string) {
   let xlsxBuffer = await readFile(files.file[0].path)
   var workbook = XLSX.read(xlsxBuffer, { type: "buffer" });
-  let sheetData = await mapConfigSheet(workbook, cacheDanhMuc, database, files.file[0].originalname, files.tepdinhkem);
+  let sheetData = await mapConfigSheet(workbook, cacheDanhMuc, database, files.file[0].originalname, files.tepdinhkem, site);
 
   return sheetData;
 }
-async function mapConfigSheet(worksheet: XLSX.WorkBook, cacheDanhMuc: string = 'false', database: string, fileName: string, fileDinhKem?: Express.Multer.File[]) {
+async function mapConfigSheet(worksheet: XLSX.WorkBook, cacheDanhMuc: string = 'false', database: string, fileName: string, fileDinhKem?: Express.Multer.File[], site?: string) {
   const responseData: any = {};
   const _Sdata: any = {};
   const _Tdata: any = {};
@@ -29,7 +29,7 @@ async function mapConfigSheet(worksheet: XLSX.WorkBook, cacheDanhMuc: string = '
   for (let sheet of [...lstSheet_T, ...lstSheet_C]) {
     _Tdata[sheet] = await buildT_Data(worksheet.Sheets[sheet], _Sdata, cacheDanhMuc, database, _fileData);
     if (Array.isArray(_Tdata[sheet])) {
-      responseData[sheet] = await bulkCreateDB(_Tdata[sheet], database, sheet, worksheet, fileName)
+      responseData[sheet] = await bulkCreateDB(_Tdata[sheet], database, sheet, worksheet, fileName, site)
     }
     else {
       responseData.err = _Tdata[sheet];
