@@ -34,7 +34,7 @@ router.post('/:database/import', upload.fields([{
 }]), async function (req, res) {
   if (req.files) {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const metadata = await processXLSX(files, req.body.cacheDanhMuc, req.params.database);
+    const metadata = await processXLSX(files, req.body.cacheDanhMuc, req.params.database, req.body.site);
     res.status(200).send(metadata)
   }
   else {
