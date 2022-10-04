@@ -6,7 +6,7 @@ import { getDanhMuc } from './danh_muc';
 import axios from 'axios';
 function addMetadataImport(record: any, fileName: string) {
   let data = record;
-  data['sourceRef'] = `ImportXlsx_${fileName}`;
+  data['sourceRef'] = `${fileName}`;
   data['username'] = `ImportSevice`;
   data['openAccess'] = 0;
   data['order'] = 0;
@@ -411,9 +411,11 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
     dbName: database,
     collectionName: collection
   })
+  let ViTriBanGhiImport = 3
   for (let record of lstData) {
     let dataToCreate: any = {};
     dataToCreate['type'] = collection;
+    dataToCreate['ViTriBanGhiImport'] = ViTriBanGhiImport
     dataToCreate = {
       ...dataToCreate,
       ...addMetadataImport(record, fileName),
@@ -425,12 +427,13 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
             "type": "C_TrangThaiDuLieu"
           }
         },
-        "storage": "011"
+        "storage": "03_import"
       } : {},
     };
     await bulkService.bulkUpsertAdd({
       sourceRefId: dataToCreate['sourceRef'] + "___" + record[findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys(record)[0]]
     }, dataToCreate);
+    ViTriBanGhiImport++
   }
   let response;
   try {
@@ -442,4 +445,82 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
   return response;
 }
 
-export { buildTepDuLieu, addMetadataImport, findFirstColumnKey, searchElastic, buildS_Data, buildT_Data, bulkCreateDB }
+async function bulkCreateDBS_TMP(lstData: any, database: string, collection: string, worksheet: WorkBook, fileName: string) {
+  console.log(findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys({})[0]);
+  await _client.db(database).collection(collection).deleteMany({
+    sourceRef: `${fileName}`,
+  })
+  const bulkService = await DBUtils.bulkCreateOneIfNotExist(_client, {
+    dbName: database,
+    collectionName: collection
+  })
+  
+  let indexS = 0;
+  if (['S_CapPhepXaNuocThai', 'S_CapPhepXaKhiThai', 'S_CapPhepTiengOnDoRung'].indexOf(collection) != -1) {
+    let lstDataArray: any = [];
+    for (let key in lstData) {
+      for (let record of lstData[key]) {
+        lstDataArray.push(record)
+        let dataToCreate: any = {};
+        dataToCreate['type'] = collection;
+        dataToCreate = {
+          ...dataToCreate,
+          ...addMetadataImport(record, fileName),
+          ...database == 'CSDL_MTQA' ? {
+            "TrangThaiDuLieu": {
+              "_source": {
+                "MaMuc": "01",
+                "TenMuc": "Sơ bộ",
+                "type": "C_TrangThaiDuLieu"
+              }
+            },
+            "storage": "03_import"
+          } : {},
+        };
+        await bulkService.bulkUpsertAdd({
+          sourceRefId: dataToCreate['sourceRef'] + "___" + indexS
+        }, dataToCreate);
+        indexS++
+      }
+    }
+  } else {
+
+    for (let key in lstData) {
+      let record: any = {
+        refKey: key,
+        data: lstData[key]
+      }
+      let dataToCreate: any = {};
+      dataToCreate['type'] = collection;
+      dataToCreate = {
+        ...dataToCreate,
+        ...addMetadataImport(record, fileName),
+        ...database == 'CSDL_MTQA' ? {
+          "TrangThaiDuLieu": {
+            "_source": {
+              "MaMuc": "01",
+              "TenMuc": "Sơ bộ",
+              "type": "C_TrangThaiDuLieu"
+            }
+          },
+          "storage": "03_import"
+        } : {},
+      };
+      await bulkService.bulkUpsertAdd({
+        sourceRefId: dataToCreate['sourceRef'] + "___" + indexS
+      }, dataToCreate);
+      indexS++
+    }
+
+  }
+  let response;
+  try {
+    response = await bulkService.bulk.execute();
+  }
+  catch (err: any) {
+    response = err.message
+  }
+  return response;
+}
+
+export { buildTepDuLieu, addMetadataImport, findFirstColumnKey, searchElastic, buildS_Data, buildT_Data, bulkCreateDB, bulkCreateDBS_TMP }
