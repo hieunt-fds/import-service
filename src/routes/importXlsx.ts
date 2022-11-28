@@ -17,7 +17,7 @@ var upload = multer({
     },
   }),
   fileFilter: (_req, file, cb) => {
-    file.originalname = Buffer.from(file.originalname, 'latin1').toString(
+    file.originalname = Buffer.from(file.originalname, 'utf8').toString(
       'utf8'
     )
     cb(null, true)
