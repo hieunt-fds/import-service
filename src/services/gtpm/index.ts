@@ -2,14 +2,14 @@ import { readFile } from 'fs-extra';
 import XLSX from 'xlsx';
 import { genDocumentToBuffer } from './docxtemplater';
 
-async function processXLSX(files: { [fieldname: string]: Express.Multer.File[] }, sheetNo: string) {
+async function processXLSX(files: { [fieldname: string]: Express.Multer.File[] }, sheetNo: string, templateFileName: string) {
   let xlsxBuffer = await readFile(files.file[0].path)
   var workbook = XLSX.read(xlsxBuffer, { type: "buffer" });
-  let sheetData = await processSheet(workbook, parseInt(sheetNo || "0"));
+  let sheetData = await processSheet(workbook, parseInt(sheetNo || "0"), templateFileName);
   return sheetData;
 }
 
-async function processSheet(workbook: XLSX.WorkBook, sheetNo: number) {
+async function processSheet(workbook: XLSX.WorkBook, sheetNo: number, templateFileName: string) {
   // var sheetNo = parseInt(req.body ? req.body.sheetNo : "1");
   // var workbook = XLSX.readFile('/app/uploads/'+ req.file.filename);
   var first_sheet = workbook.SheetNames[(sheetNo || 4) - 1]; //sheet 4 excel
@@ -54,7 +54,7 @@ async function processSheet(workbook: XLSX.WorkBook, sheetNo: number) {
       }
     }
   }
-  return await genDocumentToBuffer(sheetObj)
+  return await genDocumentToBuffer(sheetObj, templateFileName)
 }
 
 export {

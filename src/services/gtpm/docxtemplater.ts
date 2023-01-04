@@ -3,9 +3,6 @@ const PizZip = require("pizzip");
 import Docxtemplater from "docxtemplater";
 const fs = require("fs-extra");
 const expressionParser = require("docxtemplater/expressions");
-const content = fs.readFileSync("./template/thuyetminhuc.docx",
-  "binary"
-);
 
 expressionParser.filters.default = function (input: any) {
   // Make sure that if your input is undefined, your
@@ -14,9 +11,13 @@ expressionParser.filters.default = function (input: any) {
   if (!input) return "";
   return input;
 };
-const zip = new PizZip(content);
 
-async function genDocumentToBuffer(data: any) {
+async function genDocumentToBuffer(data: any, templateFileName: string) {
+  const content = fs.readFileSync(`./template/${templateFileName}`,
+    "binary"
+  );
+  const zip = new PizZip(content);
+
   const docxData = {
     value: data
   }

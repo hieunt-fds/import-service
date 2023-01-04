@@ -35,7 +35,7 @@ router.post('/import', upload.fields([{
   if (req.files) {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     let responseFileName = String(files?.file?.[0].originalname).replace('.xlsx', '.docx');
-    const fileBuffer = await processXLSX(files, req.body?.sheetNo);
+    const fileBuffer = await processXLSX(files, req.body?.sheetNo, req.body?.templateFileName);
     res.writeHead(200, {
       'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       'Content-disposition': 'attachment;filename=' + responseFileName,
