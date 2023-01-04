@@ -83,4 +83,46 @@ async function uploadExpressFile(client: MongoClient, bucket: string, fileName: 
   return fileUpload;
 }
 
-export default { createOne, deleteOne, updateById, updateOne, findOne, updateMany, findOneById, createOneIfNotExist, findMany, bulkCreateOneIfNotExist, uploadExpressFile };
+async function uploadFileFS(client: MongoClient, bucket: string, fileName: string, filePath: string) {
+  const gridfs = new GridFSBucket(client.db("oauth2"), {
+    bucketName: bucket
+  })
+  let fileUpload;
+  const upload = (filePath: string) => {
+    let file = createReadStream(filePath).pipe(gridfs.openUploadStream(fileName, {
+      chunkSizeBytes: 102400,
+      metadata: {
+        sourceRef: filePath,
+      },
+      aliases: ["/upload/:bucket"],
+    }))
+    return file;
+  };
+
+  if (await pathExists(filePath)) {
+    fileUpload = upload(filePath);
+  }
+  else if (await pathExists(filePath.replace('&', '_'))) {
+    fileUpload = upload(filePath.replace('&', '_'))
+  }
+  else if (await pathExists(filePath.replace('.pdf', '.PDF'))) {
+    fileUpload = upload(filePath.replace('&', '_'))
+  }
+  else if (await pathExists(filePath.replace('.PDF', '.pdf'))) {
+    fileUpload = upload(filePath.replace('&', '_'))
+  }
+  else {
+    console.log('filePath', filePath, 'not found!')
+  }
+  return fileUpload;
+}
+
+async function bulkUpdate(client: MongoClient, { dbName, collectionName }: { dbName: string; collectionName: string; }) {
+  var bulk = client.db(dbName).collection(collectionName).initializeUnorderedBulkOp();
+  var bulkUpsertAdd = async (filter: object, insertData: object) => {
+    bulk.find(filter).upsert().update({ $set: addMetadataCreate(insertData) })
+  }
+  return { bulk, bulkUpsertAdd }
+}
+
+export default { createOne, deleteOne, updateById, updateOne, findOne, updateMany, findOneById, createOneIfNotExist, findMany, bulkCreateOneIfNotExist, uploadExpressFile, uploadFileFS, bulkUpdate };

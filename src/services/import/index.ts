@@ -35,6 +35,7 @@ async function mapConfigSheet(worksheet: XLSX.WorkBook, cacheDanhMuc: string = '
   for (let sheet of [...lstSheet_T, ...lstSheet_C]) {
     await _client.db(database).collection(sheet).deleteMany({
       sourceRef: `${fileName}`,
+      'storage': sheet.startsWith('C_') ? 'regular' : '03_import' 
     })
     _Tdata[sheet] = await buildT_Data(worksheet.Sheets[sheet], _Sdata, cacheDanhMuc, database, _fileData);
     if (Array.isArray(_Tdata[sheet])) {
