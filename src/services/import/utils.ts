@@ -13,10 +13,10 @@ function addMetadataImport(record: any, fileName: string, site?: string) {
   data['site'] = site || 'csdl_mt';
   data['storage'] = '03_import';
   data['TrangThaiDuLieu'] = {
-    "_source":{
-      "MaMuc":"01",
-      "TenMuc":"Sơ bộ",
-      "type":"C_TrangThaiDuLieu"
+    "_source": {
+      "MaMuc": "01",
+      "TenMuc": "Sơ bộ",
+      "type": "C_TrangThaiDuLieu"
     }
   };
   data["accessRoles"] = [
@@ -217,7 +217,6 @@ async function searchElastic(db: string, collection: string, queryEs: any, aggs:
       "includes": includeField
     }
   }
-  // console.log(JSON.stringify(bodyQuery));
   let vConfig = {
     timeout: 300000,
     maxContentLength: 524288900,
@@ -457,13 +456,13 @@ async function bulkCreateDBS_TMP(lstData: any, database: string, collection: str
   console.log(findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys({})[0]);
   await _client.db(database).collection(collection).deleteMany({
     sourceRef: `${fileName}`,
-    'storage': collection.startsWith('C_') ? 'regular' : '03_import' 
+    'storage': collection.startsWith('C_') ? 'regular' : '03_import'
   })
   const bulkService = await DBUtils.bulkCreateOneIfNotExist(_client, {
     dbName: database,
     collectionName: collection
   })
-  
+
   let indexS = 0;
   if (['S_CapPhepXaNuocThai', 'S_CapPhepXaKhiThai', 'S_CapPhepTiengOnDoRung'].indexOf(collection) != -1) {
     let lstDataArray: any = [];

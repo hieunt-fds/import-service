@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer'
 import path from 'path';
 import { processXLSX } from '@services/gtpm';
+import { unlinkSync } from 'fs-extra';
 
 var upload = multer({
   storage: multer.diskStorage({
@@ -40,6 +41,7 @@ router.post('/import', upload.fields([{
       'Content-disposition': 'attachment;filename=' + responseFileName,
       'Content-Length': fileBuffer.length
     });
+    await unlinkSync(files?.file?.[0].path)
     res.end(fileBuffer);
   }
   else {

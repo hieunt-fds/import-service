@@ -15,28 +15,25 @@ expressionParser.filters.default = function (input: any) {
   return input;
 };
 const zip = new PizZip(content);
-const doc = new Docxtemplater(zip, {
-  // paragraphLoop: true,
-  linebreaks: true,
-  nullGetter: () => {
-    return ""
-  },
-  parser: expressionParser
-});
 
 async function genDocumentToBuffer(data: any) {
   const docxData = {
     value: data
   }
-  console.log(docxData);
+  const doc = new Docxtemplater(zip, {
+    // paragraphLoop: true,
+    linebreaks: true,
+    nullGetter: () => {
+      return ""
+    },
+    parser: expressionParser
+  });
   doc.setData(docxData)
   doc.render();
   const buf = doc.getZip().generate({
     type: "nodebuffer",
     compression: "DEFLATE",
   });
-  console.log(buf);
-
   return buf
 }
 
