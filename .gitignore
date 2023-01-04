@@ -83,5 +83,4 @@ dist/
 shared/
 
 #upload
-uploads/xlsx/*
-uploads/tepdinhkem/*
+uploads/*

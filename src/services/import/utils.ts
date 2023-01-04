@@ -11,7 +11,14 @@ function addMetadataImport(record: any, fileName: string, site?: string) {
   data['openAccess'] = 0;
   data['order'] = 0;
   data['site'] = site || 'csdl_mt';
-  data['storage'] = 'regular';
+  data['storage'] = '03_import';
+  data['TrangThaiDuLieu'] = {
+    "_source": {
+      "MaMuc": "01",
+      "TenMuc": "Sơ bộ",
+      "type": "C_TrangThaiDuLieu"
+    }
+  };
   data["accessRoles"] = [
     {
       "shortName": "admin",
@@ -210,7 +217,6 @@ async function searchElastic(db: string, collection: string, queryEs: any, aggs:
       "includes": includeField
     }
   }
-  // console.log(JSON.stringify(bodyQuery));
   let vConfig = {
     timeout: 300000,
     maxContentLength: 524288900,
@@ -427,11 +433,12 @@ async function bulkCreateDB(lstData: any[], database: string, collection: string
             "type": "C_TrangThaiDuLieu"
           }
         },
-        "storage": "03_import"
+        "storage": collection.startsWith('C_') ? 'regular' : "03_import"
       } : {},
     };
     await bulkService.bulkUpsertAdd({
-      sourceRefId: dataToCreate['sourceRef'] + "___" + record[findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys(record)[0]]
+      sourceRefId: dataToCreate['sourceRef'] + "___" + record[findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys(record)[0]],
+      "storage": collection.startsWith('C_') ? 'regular' : "03_import"
     }, dataToCreate);
     ViTriBanGhiImport++
   }
@@ -449,12 +456,13 @@ async function bulkCreateDBS_TMP(lstData: any, database: string, collection: str
   console.log(findFirstColumnKey(getHeaderRow(worksheet.Sheets[collection])[0]) || Object.keys({})[0]);
   await _client.db(database).collection(collection).deleteMany({
     sourceRef: `${fileName}`,
+    'storage': collection.startsWith('C_') ? 'regular' : '03_import'
   })
   const bulkService = await DBUtils.bulkCreateOneIfNotExist(_client, {
     dbName: database,
     collectionName: collection
   })
-  
+
   let indexS = 0;
   if (['S_CapPhepXaNuocThai', 'S_CapPhepXaKhiThai', 'S_CapPhepTiengOnDoRung'].indexOf(collection) != -1) {
     let lstDataArray: any = [];
@@ -474,11 +482,12 @@ async function bulkCreateDBS_TMP(lstData: any, database: string, collection: str
                 "type": "C_TrangThaiDuLieu"
               }
             },
-            "storage": "03_import"
+            "storage": collection.startsWith('C_') ? 'regular' : "03_import"
           } : {},
         };
         await bulkService.bulkUpsertAdd({
-          sourceRefId: dataToCreate['sourceRef'] + "___" + indexS
+          sourceRefId: dataToCreate['sourceRef'] + "___" + indexS,
+          "storage": collection.startsWith('C_') ? 'regular' : "03_import"
         }, dataToCreate);
         indexS++
       }
@@ -507,7 +516,8 @@ async function bulkCreateDBS_TMP(lstData: any, database: string, collection: str
         } : {},
       };
       await bulkService.bulkUpsertAdd({
-        sourceRefId: dataToCreate['sourceRef'] + "___" + indexS
+        sourceRefId: dataToCreate['sourceRef'] + "___" + indexS,
+        "storage": collection.startsWith('C_') ? 'regular' : "03_import"
       }, dataToCreate);
       indexS++
     }

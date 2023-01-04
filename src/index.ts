@@ -5,6 +5,7 @@ import https from 'https';
 import express from 'express';
 import { ensureDir } from 'fs-extra';
 import ImportXLSXRouter from "@routes/importXlsx";
+import GTPMRouter from "@routes/import_gtpm";
 
 
 https.globalAgent.options.rejectUnauthorized = false;
@@ -31,8 +32,10 @@ app.use((err: any, _req: any, res: any, _next: any) => {
 ensureDir("tmp/")
 ensureDir("uploads/xlsx")
 ensureDir("uploads/tepdinhkem")
+ensureDir("uploads/gtpm")
 
 app.use('/importXLSX', ImportXLSXRouter)
+app.use('/importGTPM', GTPMRouter)
 app.listen(process.env.PORT, async () => {
   console.log("Server is up!");
 })
