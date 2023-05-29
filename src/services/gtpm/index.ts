@@ -46,11 +46,13 @@ async function processSheet(workbook: XLSX.WorkBook, sheetNo: number, templateFi
         sheetObj[index].BMT = cotF ? cotF.v : '';
       }
     } else {
-      if (!sheetObj[index].MoTaUC) {
-        sheetObj[index].MoTaUC = []
-        sheetObj[index].MoTaUC.push(cotE ? cotE.v : '',)
-      } else {
-        sheetObj[index].MoTaUC.push(cotE ? cotE.v : '',)
+      if (sheetObj[index]) {
+        if (!sheetObj[index]?.MoTaUC) {
+          sheetObj[index].MoTaUC = []
+          sheetObj[index].MoTaUC.push(cotE ? cotE.v : '',)
+        } else {
+          sheetObj[index].MoTaUC.push(cotE ? cotE.v : '',)
+        }
       }
     }
   }
