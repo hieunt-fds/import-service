@@ -35,14 +35,20 @@ router.post('/import', upload.fields([{
   if (req.files) {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     let responseFileName = String(files?.file?.[0].originalname).replace('.xlsx', '.docx');
-    const fileBuffer = await processXLSX(files, req.body?.sheetNo, req.body?.templateFileName);
-    res.writeHead(200, {
-      'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      'Content-disposition': 'attachment;filename=' + responseFileName,
-      'Content-Length': fileBuffer.length
-    });
-    await unlinkSync(files?.file?.[0].path)
-    res.end(fileBuffer);
+    try {
+      const fileBuffer = await processXLSX(files, req.body?.sheetNo, req.body?.templateFileName);
+      res.writeHead(200, {
+        'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        'Content-disposition': 'attachment;filename=' + encodeURI(responseFileName),
+        'Content-Length': fileBuffer.length
+      });
+      await unlinkSync(files?.file?.[0].path)
+      res.end(fileBuffer);
+    } catch (error: any) {
+      console.error(error);
+      res.status(400).send({ message: error?.message });
+    }
+
   }
   else {
     res.status(400).send('File not found');
