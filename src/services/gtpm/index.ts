@@ -14,6 +14,10 @@ async function processSheet(workbook: XLSX.WorkBook, sheetNo: number, templateFi
   // var workbook = XLSX.readFile('/app/uploads/'+ req.file.filename);
   var first_sheet = workbook.SheetNames[(sheetNo || 4) - 1]; //sheet 4 excel
   var worksheet = workbook.Sheets[first_sheet];
+  if (!worksheet?.['!ref']) {
+    throw new Error("File not valid");
+
+  }
   var range = XLSX.utils.decode_range(worksheet['!ref'] || "");
 
   // row loop
