@@ -40,7 +40,7 @@ async function updateById(client: MongoClient, { dbName, collectionName, filterI
   return await client
     .db(dbName)
     .collection(collectionName)
-    .updateOne({ _id: new ObjectId(filterId) }, addMetadataUpdate(updateData));
+    .updateOne({ _id: new ObjectId(filterId) }, { $set: addMetadataUpdate(updateData) });
 }
 async function findOne(client: MongoClient, { dbName, collectionName }: mongoCollectionInfo, filter: object): Promise<WithId<Document> | null> {
   return await client.db(dbName).collection(collectionName).findOne(filter);
