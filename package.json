@@ -41,6 +41,9 @@
     "tsconfig-paths": "^4.2.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
   },
+  "overrides": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
+  },
   "_moduleAliases": {
     "@controller/*": "controller/*",
     "@db/*": "database/*",
